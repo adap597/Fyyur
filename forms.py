@@ -1,11 +1,16 @@
 from datetime import datetime
 from flask_wtf import Form
 from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
-from wtforms.validators import DataRequired, AnyOf, URL
+from wtforms.validators import DataRequired, AnyOf, URL, Regexp, ValidationError, Optional
+import re
+import urllib
 
-def validate_phone(form, field):
-    if not re.search(r"^[0-9]*$", field.data):
-        raise ValidationError("Phone number should only contain digits.")
+
+def validateURL(form,field):
+    try:
+        urllib.urlopen(field)
+    except:
+        raise ValidationError ("Please enter a valid URL.")
 
 class ShowForm(Form):
     artist_id = StringField(
@@ -85,9 +90,16 @@ class VenueForm(Form):
     )
     address = StringField(
         'address', validators=[DataRequired()]
+                
     )
+#See https://stackoverflow.com/questions/16699007/regular-expression-to-match-standard-10-digit-phone-number
+#See https://www.tutorialspoint.com/python/python_reg_expressions.htm
+#See https://explore-flask.readthedocs.io/en/latest/forms.html
     phone = StringField(
-        'phone', validators=[validate_phone]
+        'phone', validators = [DataRequired(), 
+                    Regexp(r'^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$',
+                    message='Please enter a valid phone number.')]                                
+                        
     )
     image_link = StringField(
         'image_link'
@@ -116,11 +128,26 @@ class VenueForm(Form):
             ('Other', 'Other'),
         ]
     )
+    #see https://wtforms.readthedocs.io/en/2.3.x/validators/
+    #see https://www.geeksforgeeks.org/check-if-an-url-is-valid-or-not-using-regular-expression/
     facebook_link = StringField(
-        'facebook_link', validators=[URL()]
+        'facebook_link', validators=[Optional(),
+                Regexp(r'((http|https)://)(www.)?' +
+             '[a-zA-Z0-9@:%._\\+~#?&//=]' +
+             '{2,256}\\.[a-z]' +
+             '{2,6}\\b([-a-zA-Z0-9@:%' +
+             '._\\+~#?&//=]*)',
+             message="Please enter a valid URL.")]
+                        
     )
     website_link = StringField(
-        'website_link', validators=[URL()]
+        'website_link', validators=[Optional(),
+                Regexp(r'((http|https)://)(www.)?' +
+             '[a-zA-Z0-9@:%._\\+~#?&//=]' +
+             '{2,256}\\.[a-z]' +
+             '{2,6}\\b([-a-zA-Z0-9@:%' +
+             '._\\+~#?&//=]*)',
+             message="Please enter a valid URL.")]
     )
 
     seeking_talent = BooleanField( 'seeking_talent' )
@@ -195,8 +222,11 @@ class ArtistForm(Form):
         ]
     )
     phone = StringField(
-        'phone', validators=[validate_phone]
+        'phone', validators = [DataRequired(), 
+                    Regexp(r'^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$',
+                    message='Please enter a valid phone number.')] 
     )
+
     image_link = StringField(
         'image_link'
     )
@@ -225,14 +255,29 @@ class ArtistForm(Form):
         ]
      )
     album = StringField(
-        'album', validators=[DataRequired()]
+        'album', validators=[Optional()]
+    )
+    single = StringField(
+        'single', validators=[Optional()]
     )
     facebook_link = StringField(
-        'facebook_link', validators=[URL()]
+        'facebook_link', validators=[Optional(),
+                Regexp(r'((http|https)://)(www.)?' +
+             '[a-zA-Z0-9@:%._\\+~#?&//=]' +
+             '{2,256}\\.[a-z]' +
+             '{2,6}\\b([-a-zA-Z0-9@:%' +
+             '._\\+~#?&//=]*)',
+             message="Please enter a valid URL.")]
      )
 
     website_link = StringField(
-        'website_link', validators=[URL()]
+        'website_link', validators=[Optional(),
+                Regexp(r'((http|https)://)(www.)?' +
+             '[a-zA-Z0-9@:%._\\+~#?&//=]' +
+             '{2,256}\\.[a-z]' +
+             '{2,6}\\b([-a-zA-Z0-9@:%' +
+             '._\\+~#?&//=]*)',
+             message="Please enter a valid URL.")]
      )
 
     seeking_venue = BooleanField( 'seeking_venue' )
